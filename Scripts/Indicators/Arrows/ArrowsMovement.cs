@@ -4,34 +4,28 @@ using UnityEngine;
 
 public class ArrowsMovement : MonoBehaviour
 {
-
-    bool mouseHeldDown = false;
-    bool isFirstTouchRecorded = false;
     Vector3 onMouseDownPosition;
     Vector3 mousePosition;
     float angleFromTouchToCurrent;
-    private Camera cam;
     private int vDistance = 0;
     private int hDistance = 0;
+    CharacterControl CharacterControl;
+    CharacterData characterData;
 
 
     // Start is called before the first frame update
     void Start() {
         transform.localScale = new Vector3(0, 1, 1);
-        cam = Camera.main;
+        CharacterControl = GetComponentInParent<CharacterControl>();
+        characterData = GetComponentInParent<CharacterData>();
+        
     }
 
     // Update is called once per frame
     void Update() {
-        mouseClick();
-
-        if (mouseHeldDown) {
-            mousePosition = cam.ScreenToWorldPoint(Input.mousePosition);
-            if (!isFirstTouchRecorded) {
-                onMouseDownPosition = mousePosition;
-                isFirstTouchRecorded = true;
-            }
-
+        if (CharacterControl.mouseHeldDown) {
+            onMouseDownPosition = CharacterControl.onMouseDownPosition;
+            mousePosition = CharacterControl.mousePosition;
             angleFromTouchToCurrent = 
                 Mathf.Atan2(mousePosition.y-onMouseDownPosition.y, 
                 mousePosition.x-onMouseDownPosition.x)*180 / Mathf.PI;
@@ -39,27 +33,26 @@ public class ArrowsMovement : MonoBehaviour
             transform.eulerAngles = Vector3.forward * angleFromTouchToCurrent*90f;
             if (Mathf.Abs(angleFromTouchToCurrent) == 1) {
                 vDistance = Mathf.RoundToInt(onMouseDownPosition.y - mousePosition.y);
+                vDistance = Mathf.Clamp(vDistance, (int)characterData.energy/10*-1, (int)(characterData.energy/10));
                 transform.localScale = new Vector3(Mathf.Abs(vDistance), 1, 1);
             } else {
                 hDistance = Mathf.RoundToInt(onMouseDownPosition.x - mousePosition.x);
+                hDistance = Mathf.Clamp(hDistance, (int)characterData.energy/10*-1, (int)(characterData.energy/10));
                 transform.localScale = new Vector3(Mathf.Abs(hDistance), 1, 1);
             }
         }
     }
 
-    void mouseClick() {
-        if (Input.GetMouseButtonDown(0)) {
-            mouseHeldDown = true;
-            vDistance = 0;
-            hDistance = 0;
-            isFirstTouchRecorded = false;
-        } else if (Input.GetMouseButtonUp(0)) {
-            mouseHeldDown = false;
-            transform.localScale = new Vector3(0, 1, 1);
-            transform.parent.GetComponent<CharacterMovement>().move(
-                transform.parent.transform.position, 
-                vDistance*-1, 
-                hDistance*-1);
-        }
+    public void arrowOnButtonDown() {
+        vDistance = 0;
+        hDistance = 0;
+    }
+
+    public void arrowOnButtonUp() {
+        transform.localScale = new Vector3(0, 1, 1);
+        transform.parent.GetComponent<CharacterMovement>().move(
+            transform.parent.transform.position, 
+            vDistance*-1, 
+            hDistance*-1);
     }
 }

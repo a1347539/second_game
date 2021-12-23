@@ -5,10 +5,12 @@ using UnityEngine;
 public class CharacterMovement : MonoBehaviour
 {
     Vector3 distanceToTravel;
+    CharacterData characterData;
 
     // Start is called before the first frame update
     void Start()
     {
+        characterData = GetComponent<CharacterData>();
     }
 
     // Update is called once per frame
@@ -23,6 +25,7 @@ public class CharacterMovement : MonoBehaviour
         distanceToTravel = new Vector3(characterPosition.x + hDistance, 
             characterPosition.y + vDistance, 
             characterPosition.z);
+        GetComponent<CharacterData>().deductEnergy(hDistance==0?Mathf.Abs(vDistance)*10:Mathf.Abs(hDistance)*10);
 
         transform.position = distanceToTravel;
     }
