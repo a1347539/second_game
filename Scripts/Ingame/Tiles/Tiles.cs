@@ -6,7 +6,12 @@ public class Tiles : MonoBehaviour
 {
     public Point point { get; protected set; }
 
-    public int x = 5;
+    public virtual void setup(Point point, Vector3 position, Transform parent) {
+        this.point = point;
+        transform.position = position;
+        transform.parent = parent;
+    } 
+
 
     // Start is called before the first frame update
     void Start()

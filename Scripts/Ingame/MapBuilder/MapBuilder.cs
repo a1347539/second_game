@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MapBuilder : MonoBehaviour
+public class MapBuilder : Singleton<MapBuilder>
 {
     private const int charStartAt = 97;
     public const int MAP_WIDTH = 18;
@@ -12,7 +12,8 @@ public class MapBuilder : MonoBehaviour
     private MapData mapData;
     private string[] charMap;
     private Tiles[] tilePrefabs;
-    private Dictionary<Tiles, Point> Tiles;
+    private Dictionary<Tiles, Point> tiles;
+    [SerializeField] private Transform tileContainer;
     public float tileWidth
     {
         get { return tilePrefabs[0].GetComponent<SpriteRenderer>().sprite.bounds.size.x; }
@@ -31,10 +32,14 @@ public class MapBuilder : MonoBehaviour
     void Start() {
         cam = Camera.main;
         origin = cam.ScreenToWorldPoint(new Vector3(0, Screen.height));
-        Tiles = new Dictionary<Tiles, Point>();
+        origin = new Vector3(Mathf.RoundToInt(origin.x), Mathf.RoundToInt(origin.y), origin.z);
+        tiles = new Dictionary<Tiles, Point>();
         charMap = mapData.map;
 
         createLevel();
+        foreach (KeyValuePair<Tiles, Point> tile in tiles) {
+            Debug.Log(tile.Key + " " + tile.Value);
+        }
     }
 
     private void createLevel() {
@@ -49,8 +54,8 @@ public class MapBuilder : MonoBehaviour
 
     private void placeTiles(int tileIndex, int x, int y) {
         Tiles newTile = Instantiate(tilePrefabs[tileIndex]).GetComponent<Tiles>();
-        // newTile.setup(new Point(x, y), new Vector3(origin.x + tileWidth * x, origin.y - tileHeight * y, 0), map);
-
+        Point p = new Point(x, y);
+        newTile.setup(p, new Vector3(origin.x + tileWidth * (x + 0.5f), origin.y - tileHeight * (y + 0.5f), 0), tileContainer);
+        tiles.Add(newTile, p);
     }
-
 }
