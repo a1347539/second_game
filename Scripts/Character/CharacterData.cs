@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CharacterData : MonoBehaviour
 {
-    [SerializeField] private EnergyBar energyBar;
+    private EnergyBar energyBar;
     public int maxHealth { get; private set; }
     public float maxEnergy { get; private set; }
     public float energy { get; private set; }
@@ -13,6 +13,7 @@ public class CharacterData : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        energyBar = FindObjectOfType<EnergyBar>();
         maxHealth = 10;
         maxEnergy = 100;
         energy = 10;

@@ -1,0 +1,16 @@
+{
+	"mapCode":1001,
+	"map":[
+		"ababababababababab",
+		"bababababababababa",
+		"ababababababababab",
+		"bababababababababa",
+		"ababababababababab",
+		"bababababababababa",
+		"ababababababababab",
+		"bababababababababa",
+		"ababababababababab",
+		"bababababababababa"
+	],
+	"tileset":"a"
+}
