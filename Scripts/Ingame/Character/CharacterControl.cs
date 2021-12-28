@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class CharacterControl : MonoBehaviour
 {
+    private const float EnergyRechargeRate = 0.5f;
     [SerializeField] private ArrowsMovement arrowsMovement;
-
     public Vector3 onMouseDownPosition { get { 
         return MouseManager.Instance.onMouseDownPosition; 
         } }
@@ -16,13 +16,17 @@ public class CharacterControl : MonoBehaviour
         return MouseManager.Instance.mouseHeldDown;
     } }
     private Camera cam;
-    private float energyGenerationSpeed = 0.02f;
+    private float energyGenerationSpeed = 0.01f;
     private float energyGenerationInitalTime = 0f;
     public int[] maxDistanceFromSelf { get; private set; } // top right down left
+    CharacterData characterData;
+    CharacterMovement characterMovement;
     
 
     // Start is called before the first frame update
     void Start() {
+        characterMovement = GetComponent<CharacterMovement>();
+        characterData = GetComponent<CharacterData>();
         maxDistanceFromSelf = new int[4];
         cam = Camera.main;
         // snapToGrid();
@@ -40,14 +44,12 @@ public class CharacterControl : MonoBehaviour
 
         if (MouseManager.Instance.onMouseDown) {
             checkWalkableDistance();
-            arrowsMovement.arrowOnButtonDown();
-            
             MouseManager.Instance.onMouseDown = false;
         }
 
         if (MouseManager.Instance.onMouseRelease) {
             arrowsMovement.arrowOnButtonUp();
-            GetComponent<CharacterMovement>().move();
+            characterMovement.move();
             MouseManager.Instance.onMouseRelease = false;
         }
     
@@ -63,11 +65,11 @@ public class CharacterControl : MonoBehaviour
     }
 
     private void rechargeEnergy() {
-        if (!GetComponent<CharacterData>().isMaxEnergy()) {
+        if (!characterData.isMaxEnergy()) {
             energyGenerationInitalTime += Time.deltaTime;
             if (energyGenerationInitalTime >= energyGenerationSpeed) {
                 energyGenerationInitalTime = 0;
-                GetComponent<CharacterData>().rechargeEnergy(0.5f);
+                characterData.rechargeEnergy(EnergyRechargeRate);
             }
         }
     }

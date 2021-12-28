@@ -8,4 +8,5 @@ public class MapData
     public string[] map;
     public char tileset;
     public int[][] spawnA;
+    public int[][] spawnB;
 }

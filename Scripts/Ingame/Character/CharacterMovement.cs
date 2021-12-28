@@ -19,12 +19,14 @@ public class CharacterMovement : MonoBehaviour
     Vector3 distanceToTravel;
     CharacterData characterData;
     CharacterControl characterControl;
+    Character character;
 
     // Start is called before the first frame update
     void Start() {
         vDistance = 0; hDistance = 0;
         characterData = GetComponent<CharacterData>();
         characterControl = GetComponent<CharacterControl>();
+        character = GetComponent<Character>();
     }
 
     // Update is called once per frame
@@ -54,11 +56,12 @@ public class CharacterMovement : MonoBehaviour
     }
 
     public void move() {
+        Point destination = new Point(character.point.x + hDistance, character.point.y - vDistance);
         distanceToTravel = new Vector3(transform.position.x + hDistance, 
             transform.position.y + vDistance, 
             transform.position.z);
-        GetComponent<CharacterData>().deductEnergy(hDistance==0?Mathf.Abs(vDistance)*10:Mathf.Abs(hDistance)*10);
-
+        character.point = destination;
+        characterData.deductEnergy(hDistance==0?Mathf.Abs(vDistance)*10:Mathf.Abs(hDistance)*10);
         transform.position = distanceToTravel;
     }
 }

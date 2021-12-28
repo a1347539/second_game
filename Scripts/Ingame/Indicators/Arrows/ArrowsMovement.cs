@@ -31,10 +31,6 @@ public class ArrowsMovement : MonoBehaviour
         }
     }
 
-    public void arrowOnButtonDown() {
-
-    }
-
     public void arrowOnButtonUp() {
         transform.localScale = new Vector3(0, 1, 1);
     }

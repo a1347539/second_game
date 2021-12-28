@@ -14,10 +14,10 @@ public class CharacterData : MonoBehaviour
     void Start()
     {
         energyBar = FindObjectOfType<EnergyBar>();
-        maxHealth = 10;
+        maxHealth = 100;
         maxEnergy = 100;
-        energy = 10;
-        health = 10;
+        energy = 100;
+        health = 100;
         energyBar.updateEnergy(energy);
     }
 
@@ -34,6 +34,7 @@ public class CharacterData : MonoBehaviour
     public void rechargeEnergy(float energyIncrease, bool nonNatural=false) {
         energy+=energyIncrease;
         if (nonNatural) {
+            // do something else
             return;
         }
         energyBar.updateEnergy(energy);
