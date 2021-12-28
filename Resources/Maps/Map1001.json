@@ -1,16 +1,20 @@
 {
 	"mapCode":1001,
 	"map":[
-		"ababababababababab",
-		"bababababababababa",
-		"ababababababababab",
-		"bababababababababa",
-		"ababababababababab",
-		"bababababababababa",
-		"ababababababababab",
-		"bababababababababa",
-		"ababababababababab",
-		"bababababababababa"
+		"CDEBBBBBBBBBBBBBBB",
+		"F0GCDDDDDDDDDDDDEB",
+		"F2GF42104><<<<<?GB",
+		"HIJF10412:555559GB",
+		"BBBF10301:555559GB",
+		"BBBF12031:555559GB",
+		"BBBF03102:555559GB",
+		"BBBF40130@77777AGB",
+		"BBBHIIIIIIIIIIIIJB",
+		"BBBBBBBBBBBBBBBBBB"
 	],
-	"tileset":"a"
+	"tileset":"0",
+	"spawnA": [
+		[5, 4],
+		[4, 6]
+	]
 }

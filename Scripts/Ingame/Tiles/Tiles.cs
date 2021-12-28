@@ -6,10 +6,13 @@ public class Tiles : MonoBehaviour
 {
     public Point point { get; protected set; }
 
-    public virtual void setup(Point point, Vector3 position, Transform parent) {
+    public bool isWalkable { get; protected set; }
+
+    public virtual void setup(Point point, Vector3 position, Transform container) {
         this.point = point;
         transform.position = position;
-        transform.parent = parent;
+        transform.parent = container;
+        this.name = point.print();
     } 
 
 

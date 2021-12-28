@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class MapBuilder : Singleton<MapBuilder>
 {
-    private const int charStartAt = 97;
+    private const int charStartAt = 48;
     public const int MAP_WIDTH = 18;
     public const int MAP_HEIGHT = 10;
-    private Vector3 origin;
+    public Vector3 origin { get; private set; }
     private Camera cam;
-    private MapData mapData;
+    public MapData mapData { get; private set; }
     private string[] charMap;
     private Tiles[] tilePrefabs;
-    private Dictionary<Tiles, Point> tiles;
+    public Dictionary<Tiles, Point> tiles { get; private set; }
     [SerializeField] private Transform tileContainer;
     public float tileWidth
     {
@@ -25,21 +25,19 @@ public class MapBuilder : Singleton<MapBuilder>
 
     private void Awake() {
         mapData = ResourcesLoader.Load<MapData>("Maps", "Map1001");
-        tilePrefabs = Resources.LoadAll<Tiles>("Tilesets/Tileset"+((int)mapData.tileset-charStartAt));
+        tilePrefabs = Resources.LoadAll<Tiles>("Prefabs/Tilesets/Tileset"+((int)mapData.tileset-charStartAt));
+        cam = Camera.main;
+        origin = cam.ScreenToWorldPoint(new Vector3(0, Screen.height));
+        origin = new Vector3(Mathf.RoundToInt(origin.x), Mathf.RoundToInt(origin.y), origin.z);
     }
 
     // Start is called before the first frame update
     void Start() {
-        cam = Camera.main;
-        origin = cam.ScreenToWorldPoint(new Vector3(0, Screen.height));
-        origin = new Vector3(Mathf.RoundToInt(origin.x), Mathf.RoundToInt(origin.y), origin.z);
         tiles = new Dictionary<Tiles, Point>();
         charMap = mapData.map;
 
         createLevel();
-        foreach (KeyValuePair<Tiles, Point> tile in tiles) {
-            Debug.Log(tile.Key + " " + tile.Value);
-        }
+
     }
 
     private void createLevel() {
@@ -54,6 +52,7 @@ public class MapBuilder : Singleton<MapBuilder>
 
     private void placeTiles(int tileIndex, int x, int y) {
         Tiles newTile = Instantiate(tilePrefabs[tileIndex]).GetComponent<Tiles>();
+
         Point p = new Point(x, y);
         newTile.setup(p, new Vector3(origin.x + tileWidth * (x + 0.5f), origin.y - tileHeight * (y + 0.5f), 0), tileContainer);
         tiles.Add(newTile, p);

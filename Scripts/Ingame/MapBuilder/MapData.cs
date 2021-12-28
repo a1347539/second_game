@@ -7,4 +7,5 @@ public class MapData
     public int mapCode;
     public string[] map;
     public char tileset;
+    public int[][] spawnA;
 }
