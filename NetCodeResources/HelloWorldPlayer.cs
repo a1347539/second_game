@@ -2,65 +2,68 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
-public class HelloWorldPlayer : NetworkBehaviour
+using Unity.Collections;
+
+namespace NetCodeTest
 {
-    public NetworkVariable<Vector3> Position = new NetworkVariable<Vector3>();
-    private NetworkVariable<Color> playerColor = new NetworkVariable<Color>();
-
-    public override void OnNetworkSpawn()
+    public class HelloWorldPlayer : NetworkBehaviour
     {
-        if (IsOwner)
+        public NetworkVariable<Vector2> Position = new NetworkVariable<Vector2>();
+        public NetworkVariable<Color> playerColor = new NetworkVariable<Color>();
+        public Rigidbody2D rb;
+
+        public override void OnNetworkSpawn()
         {
-            Move();
+            rb = GetComponent<Rigidbody2D>();
+            if (IsLocalPlayer)
+            {
+                print(NetworkManager.Singleton.LocalClientId);
+            }
         }
-    }
 
-    public void Move()
-    {
-        if (NetworkManager.Singleton.IsServer)
+        void Update()
         {
-            Vector3 randomPosition = GetRandomPositionOnPlane();
-            transform.position = randomPosition;
-            Position.Value = randomPosition;
+            if (!IsLocalPlayer) { return; }
+            if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
+            {
+                changePositionServerRpc(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+                rb.MovePosition(rb.position + Position.Value * 5f * Time.fixedDeltaTime);
+            }
         }
-        else
+
+        [ServerRpc]
+        public void setColorServerRpc(Color color)
         {
-            SubmitPositionRequestServerRpc();
+            playerColor.Value = color;
         }
-    }
 
-    [ServerRpc]
-    public void setColorServerRpc(Color color) {
-        playerColor.Value = color;
-    }
+        [ServerRpc]
+        private void changePositionServerRpc(float x, float y)
+        {
+            Vector2 newPos = new Vector2(x, y);
+            Position.Value = newPos;
+        }
 
-    private void OnEnable() {
-        playerColor.OnValueChanged += onColorChanged;
-    }
+        private void OnEnable()
+        {
+            playerColor.OnValueChanged += onColorChanged;
+            Position.OnValueChanged += onPositionChanged;
+        }
 
-    private void OnDisable() {
-        playerColor.OnValueChanged -= onColorChanged;
-    }
+        private void OnDisable()
+        {
+            playerColor.OnValueChanged -= onColorChanged;
+            Position.OnValueChanged -= onPositionChanged;
+        }
 
-    private void onColorChanged(Color previousValue, Color newValue)
-    {
-        if (!IsClient) { return; }
-        GetComponent<Renderer>().material.SetColor("_Color", newValue);
-    }
+        private void onPositionChanged(Vector2 previousValue, Vector2 newValue)
+        {
+            rb.MovePosition(rb.position + Position.Value * 5f * Time.fixedDeltaTime);
+        }
 
-    [ServerRpc]
-    void SubmitPositionRequestServerRpc(ServerRpcParams rpcParams = default)
-    {
-        Position.Value = GetRandomPositionOnPlane();
-    }
-
-    static Vector3 GetRandomPositionOnPlane()
-    {
-        return new Vector3(Random.Range(-3f, 3f), Random.Range(-3f, 3f), 1f);
-    }
-
-    void Update()
-    {
-        transform.position = Position.Value;
+        private void onColorChanged(Color previousValue, Color newValue)
+        {
+            GetComponent<Renderer>().material.SetColor("_Color", newValue);
+        }
     }
 }

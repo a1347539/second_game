@@ -12,7 +12,8 @@ public class MapBuilder : Singleton<MapBuilder>
     public MapData mapData { get; private set; }
     private string[] charMap;
     private Tiles[] tilePrefabs;
-    public Dictionary<Tiles, Point> tiles { get; private set; }
+    public Dictionary<Point, Tiles> tilesDict { get; private set; }
+    public List<Tiles> tilesList { get; private set; }
     [SerializeField] private Transform tileContainer;
     public float tileWidth
     {
@@ -33,7 +34,8 @@ public class MapBuilder : Singleton<MapBuilder>
 
     // Start is called before the first frame update
     void Start() {
-        tiles = new Dictionary<Tiles, Point>();
+        tilesDict = new Dictionary<Point, Tiles>();
+        tilesList = new List<Tiles>();
         charMap = mapData.map;
 
         createLevel();
@@ -55,6 +57,19 @@ public class MapBuilder : Singleton<MapBuilder>
 
         Point p = new Point(x, y);
         newTile.setup(p, new Vector3(origin.x + tileWidth * (x + 0.5f), origin.y - tileHeight * (y + 0.5f), 0), tileContainer);
-        tiles.Add(newTile, p);
+        tilesDict.Add(p, newTile);
+        tilesList.Add(newTile);
+    }
+
+    public Tiles getRandomWalkableTile() {
+        System.Random rand = new System.Random();
+        while (true)
+        {
+            Tiles tempTile = tilesList[rand.Next(tilesList.Count)];
+            if (tempTile.CompareTag("WalkableTile"))
+            {
+                return tempTile;
+            }
+        }
     }
 }

@@ -1,25 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class ArrowsMovement : MonoBehaviour
+public class ArrowsMovement : NetworkBehaviour
 {
-    public bool mouseHeldDown { get {
-        return MouseManager.Instance.mouseHeldDown;
-    } }
-    CharacterMovement characterMovement;
+    InGameCharacterMovement characterMovement;
+    InGamePlayerControllerManager controllerManager;
 
 
     // Start is called before the first frame update
     void Start() {
+        if (!IsOwner) { return; }
+        controllerManager = GetComponentInParent<InGamePlayerControllerManager>();
+        characterMovement = GetComponentInParent<InGameCharacterMovement>();
         transform.localScale = new Vector3(0, 1, 1);
-
-        characterMovement = GetComponentInParent<CharacterMovement>();
     }
 
     // Update is called once per frame
     void Update() {
-        if (mouseHeldDown) {
+        if (!IsOwner) { return; }
+        if (controllerManager.mouseHeldDown) {
             transform.eulerAngles = Vector3.forward * characterMovement.angleFromTouchToCurrent*90f;
             if (characterMovement.hDistance != 0) {
                 transform.localScale = new Vector3(

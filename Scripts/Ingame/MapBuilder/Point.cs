@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Point
+public struct Point
 {
     public int x { get; set; }
     public int y { get; set; }
@@ -10,6 +10,14 @@ public class Point
     public Point(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    public Vector3 toWorldPosition() {
+        return new Vector3(
+           MapBuilder.Instance.origin.x + MapBuilder.Instance.tileWidth * (x + 0.5f),
+           MapBuilder.Instance.origin.y - MapBuilder.Instance.tileHeight * (y + 0.5f),
+           0
+       );
     }
 
     public string print() {

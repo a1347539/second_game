@@ -1,0 +1,2 @@
+use ASCII
+start from 48 = 0 in ASCII
