@@ -8,6 +8,10 @@ public static class InGamePlayerInteractionData
 
     public const float EnergyRechargeRate = 1.5f;
 
+    public static readonly string[] facingDirections = { "IdleUp", "IdleRight", "IdleDown", "IdleLeft" };
+
+    public static readonly string[] facingDirectionsWhenCharging = { "ChargingUp", "ChargingRight", "ChargingDown", "ChargingLeft" };
+
     public enum ReceivedState { 
         initialization,
         onHit,
@@ -18,5 +22,12 @@ public static class InGamePlayerInteractionData
         dash,
         weapon,
         skill
+    };
+
+    public enum FacingDirection { 
+        up, 
+        right, 
+        down, 
+        left
     };
 }

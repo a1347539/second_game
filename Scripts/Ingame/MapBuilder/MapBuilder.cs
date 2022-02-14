@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 public class MapBuilder : Singleton<MapBuilder>
@@ -63,12 +64,22 @@ public class MapBuilder : Singleton<MapBuilder>
 
     public Tiles getRandomWalkableTile() {
         System.Random rand = new System.Random();
+        bool occupiedByOther;
         while (true)
         {
+            occupiedByOther = false;
             Tiles tempTile = tilesList[rand.Next(tilesList.Count)];
             if (tempTile.CompareTag("WalkableTile"))
             {
-                return tempTile;
+                foreach (KeyValuePair<ulong, NetworkObject> pair in InGameGlobalDataManager.Instance.playerObjectDict) {
+                    if (pair.Value.GetComponent<InGameCharacter>().point.Value == tempTile.point) {
+                        occupiedByOther = true;
+                        break;
+                    }
+                }
+                if (!occupiedByOther) {
+                    return tempTile;
+                }
             }
         }
     }

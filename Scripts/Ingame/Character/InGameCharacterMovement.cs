@@ -8,16 +8,9 @@ public class InGameCharacterMovement : NetworkBehaviour
 {
     public event Action<Point, Point> onPlayerMovedEvent;
 
-    public Vector3 onMouseDownPosition { get { 
-        return controllerManager.onMouseDownPosition; 
-        } }
-    public Vector3 mousePosition { get {
-        return controllerManager.mousePosition;
-    } }
-    public bool mouseHeldDown { get {
-        return controllerManager.mouseHeldDown;
-    } }
-    public float angleFromTouchToCurrent { get; private set; }
+    public Vector3 onMouseDownPosition { get { return controllerManager.onMouseDownPosition; } }
+    public Vector3 mousePosition { get { return controllerManager.mousePosition; } }
+    public float angleFromTouchToCurrent { get { return controllerManager.angleFromTouchToCurrent; } }
     public int vDistance { get; private set; } = 0;
     public int hDistance { get; private set; } = 0;
     InGameCharacterData characterData;
@@ -34,30 +27,35 @@ public class InGameCharacterMovement : NetworkBehaviour
         controllerManager = GetComponent<InGamePlayerControllerManager>();
     }
 
-    // Update is called once per frame
-    void Update() {
+    private void Start()
+    {
         if (!IsOwner) { return; }
-        if (mouseHeldDown) {
-            angleFromTouchToCurrent = 
-                Mathf.Atan2(mousePosition.y-onMouseDownPosition.y, 
-                mousePosition.x-onMouseDownPosition.x)*180 / Mathf.PI;
-            angleFromTouchToCurrent = Mathf.RoundToInt(angleFromTouchToCurrent*2f/180f);
+        controllerManager.mousePressedDownEvent += handleMousePressedDown;
+    }
 
-            if (Mathf.Abs(angleFromTouchToCurrent) == 1) {
-                hDistance = 0;
-                vDistance = Mathf.RoundToInt(mousePosition.y - onMouseDownPosition.y);
-                vDistance = Mathf.Clamp(
-                    vDistance, -characterControl.maxDistanceFromSelf.Value.down, characterControl.maxDistanceFromSelf.Value.top);
-                vDistance = Mathf.Clamp(vDistance, (int)characterData.energy.Value/10*-1, (int)(characterData.energy.Value/10));
+    private void OnDestroy()
+    {
+        controllerManager.mousePressedDownEvent -= handleMousePressedDown;
+    }
 
-            } else {
-                vDistance = 0;
-                hDistance = Mathf.RoundToInt(mousePosition.x - onMouseDownPosition.x);
-                hDistance = Mathf.Clamp(
-                    hDistance, -characterControl.maxDistanceFromSelf.Value.left, characterControl.maxDistanceFromSelf.Value.right);
-                
-                hDistance = Mathf.Clamp(hDistance, (int)characterData.energy.Value/10*-1, (int)(characterData.energy.Value/10));
-            }
+    private void handleMousePressedDown() {
+        if (Mathf.Abs(angleFromTouchToCurrent) == 1)
+        {
+            hDistance = 0;
+            vDistance = Mathf.RoundToInt(mousePosition.y - onMouseDownPosition.y);
+            vDistance = Mathf.Clamp(
+                vDistance, -characterControl.maxDistanceFromSelf.Value.down, characterControl.maxDistanceFromSelf.Value.top);
+            vDistance = Mathf.Clamp(vDistance, (int)characterData.energy.Value / 10 * -1, (int)(characterData.energy.Value / 10));
+
+        }
+        else
+        {
+            vDistance = 0;
+            hDistance = Mathf.RoundToInt(mousePosition.x - onMouseDownPosition.x);
+            hDistance = Mathf.Clamp(
+                hDistance, -characterControl.maxDistanceFromSelf.Value.left, characterControl.maxDistanceFromSelf.Value.right);
+
+            hDistance = Mathf.Clamp(hDistance, (int)characterData.energy.Value / 10 * -1, (int)(characterData.energy.Value / 10));
         }
     }
 

@@ -7,6 +7,7 @@ using System;
 public class InGameCharacter : NetworkBehaviour
 {
     [SerializeField] Canvas attachedContainer;
+    [SerializeField] ParticleSystem smokeParticle;
     public NetworkVariable<InGamePlayerInteractionData.ReceivedState> receivedState =
         new NetworkVariable<InGamePlayerInteractionData.ReceivedState>();
 
@@ -20,14 +21,17 @@ public class InGameCharacter : NetworkBehaviour
     public NetworkVariable<bool> isInteractable = new NetworkVariable<bool>();
 
     public InGameCharacterData characterData;
+    public InGameCharacterAnimationManager animationManager;
 
     public override void OnNetworkSpawn()
     {
         if (!IsOwner) { return; }
         playerInitServerRpc();
         characterData = GetComponent<InGameCharacterData>();
+        animationManager = GetComponent<InGameCharacterAnimationManager>();
         updatePositionServerRpc(transform.position);
         receivedState.OnValueChanged += handleOnReceivedDataFromServer;
+        point.OnValueChanged += handleOnPointChanged;
     }
 
     private void Start()
@@ -37,6 +41,7 @@ public class InGameCharacter : NetworkBehaviour
     private void OnDestroy()
     {
         receivedState.OnValueChanged -= handleOnReceivedDataFromServer;
+        point.OnValueChanged -= handleOnPointChanged;
     }
 
     private void Update()
@@ -57,14 +62,20 @@ public class InGameCharacter : NetworkBehaviour
         }
     }
 
+    private void handleOnPointChanged(Point oldValue, Point newValue) {
+        setIsInteractableServerRpc(true);
+        unhidePlayerServerRpc();
+    }
 
     // called by server
     public void onHit() {
         switch (receivedHitBy.Value)
         {
             case InGamePlayerInteractionData.ReceivedHitBy.dash:
+                spawnSmokeParticleServerRpc();
                 characterData.deductHealth(damageTaken.Value);
                 StartCoroutine(respawn());
+                animationManager.setIdleAnimation(2);
                 break;
             case InGamePlayerInteractionData.ReceivedHitBy.weapon:
                 break;
@@ -106,6 +117,11 @@ public class InGameCharacter : NetworkBehaviour
     }
 
     [ServerRpc]
+    private void spawnSmokeParticleServerRpc() {
+        spawnSmokeParticleClientRpc();
+    }
+
+    [ServerRpc]
     private void updatePointServerRpc(Point newPoint) {
         point.Value = newPoint;
     }
@@ -131,12 +147,15 @@ public class InGameCharacter : NetworkBehaviour
     }
 
     [ServerRpc]
-    public void onHitByDashServerRpc() {
-        Tiles respawnTile = MapBuilder.Instance.getRandomWalkableTile();
-        point.Value = respawnTile.point;
-        transform.position = respawnTile.point.toWorldPosition();
-        setIsInteractableServerRpc(true);
+    private void unhidePlayerServerRpc() {
         unhidePlayerClientRpc();
+    }
+
+    [ServerRpc]
+    public void onHitByDashServerRpc() {
+        Tiles respawnTile = MapBuilder.Instance.getRandomWalkableTile(); 
+        transform.position = respawnTile.point.toWorldPosition();
+        point.Value = respawnTile.point;
     }
 
     [ClientRpc]
@@ -151,5 +170,10 @@ public class InGameCharacter : NetworkBehaviour
     {
         attachedContainer.enabled = true;
         GetComponent<Renderer>().enabled = true;
+    }
+
+    [ClientRpc]
+    private void spawnSmokeParticleClientRpc() {
+        Instantiate(smokeParticle, transform.position, Quaternion.identity);
     }
 }

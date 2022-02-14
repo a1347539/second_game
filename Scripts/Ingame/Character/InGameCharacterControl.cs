@@ -18,15 +18,8 @@ public struct MaxDistanceStruct {
 public class InGameCharacterControl : NetworkBehaviour
 {
     [SerializeField] private ArrowsMovement arrowsMovement;
-    public Vector3 onMouseDownPosition { get { 
-        return controllerManager.onMouseDownPosition; 
-        } }
-    public Vector3 mousePosition { get {
-        return controllerManager.mousePosition;
-    } }
-    public bool mouseHeldDown { get {
-        return controllerManager.mouseHeldDown;
-    } }
+    public float angleFromTouchToCurrent { get { return controllerManager.angleFromTouchToCurrent; } }
+
     private int regenPerTick = 1;
     private int previousTickValue = 0;
 
@@ -36,6 +29,7 @@ public class InGameCharacterControl : NetworkBehaviour
     InGameCharacterData characterData;
     InGameCharacterMovement characterMovement;
     InGamePlayerControllerManager controllerManager;
+    InGameCharacterAnimationManager animationManager;
 
     public override void OnNetworkSpawn()
     {
@@ -44,6 +38,7 @@ public class InGameCharacterControl : NetworkBehaviour
         controllerManager = GetComponent<InGamePlayerControllerManager>();
         characterMovement = GetComponent<InGameCharacterMovement>();
         characterData = GetComponent<InGameCharacterData>();
+        animationManager = GetComponent<InGameCharacterAnimationManager>();
         updateMaxDistanceFromSelfServerRpc(new MaxDistanceStruct(0, 0, 0, 0));
     }
 
@@ -52,35 +47,45 @@ public class InGameCharacterControl : NetworkBehaviour
         if (!IsOwner) { return; }
         controllerManager.onMouseDownEvent += handleOnMouseDown;
         controllerManager.onMouseReleasedEvent += handleOnMouseReleased;
+        controllerManager.mousePressedDownEvent += handleMousePressedDown;
         characterMovement.onPlayerMovedEvent += handleOnMoved;
-    }
-
-    // Update is called once per frame
-    void Update() {
-        if (!IsOwner) { return; }
-
-        if (mouseHeldDown) {
-            // check if is just pressing
-            if (characterMovement.vDistance == 0 & characterMovement.hDistance == 0) {
-                rechargeEnergy();
-            }
-        }
     }
 
     private void OnDestroy()
     {
         controllerManager.onMouseDownEvent -= handleOnMouseDown;
         controllerManager.onMouseReleasedEvent -= handleOnMouseReleased;
+        controllerManager.mousePressedDownEvent -= handleMousePressedDown;
         characterMovement.onPlayerMovedEvent -= handleOnMoved;
     }
 
     private void handleOnMouseDown() {
         checkWalkableDistance();
+        animationManager.changeOnMouseDownAnimation();
     }
 
     private void handleOnMouseReleased() {
         arrowsMovement.arrowOnButtonUp();
         characterMovement.move();
+        animationManager.setIdleAnimation();
+    }
+
+    private void handleMousePressedDown() {
+        // check if is just pressing
+        if (characterMovement.vDistance == 0 && characterMovement.hDistance == 0)
+        {
+            rechargeEnergy();
+        }
+        else {
+            if (Mathf.Abs(angleFromTouchToCurrent) == 1)
+            {
+                animationManager.changeFacingDirectionWhenCharging(angleFromTouchToCurrent == -1 ? 2 : 0);
+            }
+            else
+            {
+                animationManager.changeFacingDirectionWhenCharging(angleFromTouchToCurrent == 0 ? 1 : 3);
+            }
+        }
     }
 
     private void handleOnMoved(Point previousValue, Point newValue)
