@@ -16,6 +16,7 @@ public class MapBuilder : Singleton<MapBuilder>
     public Dictionary<Point, Tiles> tilesDict { get; private set; }
     public List<Tiles> tilesList { get; private set; }
     [SerializeField] private Transform tileContainer;
+
     public float tileWidth
     {
         get { return tilePrefabs[0].GetComponent<SpriteRenderer>().sprite.bounds.size.x; }
